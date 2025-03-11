@@ -23,13 +23,13 @@ class CalculatorTests(unittest.TestCase):
             cls.app = Application(backend="uia").start("calc.exe")
             time.sleep(2)
 
-        cls.dlg = Desktop(backend="uia").Calculator
+        cls.dlg = cls.app.window(title="Calculator")
 
     @classmethod
     def tearDownClass(cls):
         """Cleanup: Close Calculator"""
         try:
-            cls.dlg.child_window(title="Close Calculator", auto_id="Close", control_type="Button").click()
+            cls.dlg.child_window(auto_id="Close", control_type="Button").click()
             print("Calculator closed.")
         except:
             print("Calculator was already closed or not found.")
@@ -40,55 +40,61 @@ class CalculatorTests(unittest.TestCase):
         self.dlg.set_focus()
         time.sleep(1)
 
+    def get_result(self):
+        """Get the displayed result from Calculator"""
+        result_element = self.dlg.child_window(auto_id="CalculatorResults", control_type="Text")
+        result_text = result_element.window_text()
+        return result_text.replace("Display is ", "").strip()
+
     def test_multiplication(self):
         """Test: 7 × 5 = 35"""
         dlg = self.dlg
-        dlg.child_window(title="Seven", auto_id="num7Button", control_type="Button").wait('exists', timeout=5).click()
-        dlg.child_window(title="Multiply by", auto_id="multiplyButton", control_type="Button").click()
-        dlg.child_window(title="Five", auto_id="num5Button", control_type="Button").click()
-        dlg.child_window(title="Equals", auto_id="equalButton", control_type="Button").click()
+        dlg.child_window(auto_id="num7Button", control_type="Button").click()
+        dlg.child_window(auto_id="multiplyButton", control_type="Button").click()
+        dlg.child_window(auto_id="num5Button", control_type="Button").click()
+        dlg.child_window(auto_id="equalButton", control_type="Button").click()
         time.sleep(1)
 
-        result_element = dlg.child_window(auto_id="CalculatorResults", control_type="Text")
-        self.assertIn("35", result_element.window_text(), "Multiplication Test Failed!")
+        result = self.get_result()
+        self.assertEqual(result, "35", "Multiplication Test Failed!")
         print("Multiplication Test Passed!")
 
     def test_division(self):
         """Test: 8 ÷ 2 = 4"""
         dlg = self.dlg
-        dlg.child_window(title="Eight", auto_id="num8Button", control_type="Button").click()
-        dlg.child_window(title="Divide by", auto_id="divideButton", control_type="Button").click()
-        dlg.child_window(title="Two", auto_id="num2Button", control_type="Button").click()
-        dlg.child_window(title="Equals", auto_id="equalButton", control_type="Button").click()
+        dlg.child_window(auto_id="num8Button", control_type="Button").click()
+        dlg.child_window(auto_id="divideButton", control_type="Button").click()
+        dlg.child_window(auto_id="num2Button", control_type="Button").click()
+        dlg.child_window(auto_id="equalButton", control_type="Button").click()
         time.sleep(1)
 
-        result_element = dlg.child_window(auto_id="CalculatorResults", control_type="Text")
-        self.assertIn("4", result_element.window_text(), "Division Test Failed!")
+        result = self.get_result()
+        self.assertEqual(result, "4", "Division Test Failed!")
         print("Division Test Passed!")
 
     def test_subtraction(self):
         """Test: 9 - 4 = 5"""
         dlg = self.dlg
-        dlg.child_window(title="Nine", auto_id="num9Button", control_type="Button").click()
-        dlg.child_window(title="Minus", auto_id="minusButton", control_type="Button").click()
-        dlg.child_window(title="Four", auto_id="num4Button", control_type="Button").click()
-        dlg.child_window(title="Equals", auto_id="equalButton", control_type="Button").click()
+        dlg.child_window(auto_id="num9Button", control_type="Button").click()
+        dlg.child_window(auto_id="minusButton", control_type="Button").click()
+        dlg.child_window(auto_id="num4Button", control_type="Button").click()
+        dlg.child_window(auto_id="equalButton", control_type="Button").click()
         time.sleep(1)
 
-        result_element = dlg.child_window(auto_id="CalculatorResults", control_type="Text")
-        self.assertIn("5", result_element.window_text(), "Subtraction Test Failed!")
+        result = self.get_result()
+        self.assertEqual(result, "5", "Subtraction Test Failed!")
         print("Subtraction Test Passed!")
 
     def test_square_root(self):
         """Test: √16 = 4"""
         dlg = self.dlg
-        dlg.child_window(title="One", auto_id="num1Button", control_type="Button").click()
-        dlg.child_window(title="Six", auto_id="num6Button", control_type="Button").click()
-        dlg.child_window(title="Square root", auto_id="squareRootButton", control_type="Button").click()
+        dlg.child_window(auto_id="num1Button", control_type="Button").click()
+        dlg.child_window(auto_id="num6Button", control_type="Button").click()
+        dlg.child_window(auto_id="squareRootButton", control_type="Button").click()
         time.sleep(1)
 
-        result_element = dlg.child_window(auto_id="CalculatorResults", control_type="Text")
-        self.assertIn("4", result_element.window_text(), "Square Root Test Failed!")
+        result = self.get_result()
+        self.assertEqual(result, "4", "Square Root Test Failed!")
         print("Square Root Test Passed!")
 
     def test_minimize_restore(self):
@@ -99,7 +105,7 @@ class CalculatorTests(unittest.TestCase):
 
         # Reconnect after restoring
         self.app = Application(backend="uia").connect(title="Calculator")
-        dlg = self.app.Calculator
+        dlg = self.app.window(title="Calculator")
         self.assertIsNotNone(dlg, "Restore Test Failed!")
         print("Minimize & Restore Test Passed!")
 
